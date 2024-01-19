@@ -12,18 +12,24 @@ typedef struct {
     SDL_Texture* texture;
 } Sprite;
 
+typedef struct {
+    int window_width;
+    int window_height;
+    int sound;
+} Config;
+
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 Sprite sprites[5]; // Tableau de sprites
 int score = 0;
 
-bool initializeSDL() {
+bool initializeSDL(Config config) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "Erreur d'initialisation de la SDL : %s\n", SDL_GetError());
         return false;
     }
 
-    window = SDL_CreateWindow("Cliquez sur les sprites!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Cliquez sur les sprites!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, config.window_width, config.window_height, SDL_WINDOW_SHOWN);
     if (window == NULL) {
         fprintf(stderr, "Erreur lors de la création de la fenêtre : %s\n", SDL_GetError());
         return false;
@@ -51,12 +57,12 @@ SDL_Texture* loadTexture(const char* path) {
     return texture;
 }
 
-void loadSprites() {
+void loadSprites(Config config) {
     for (int i = 0; i < 5; ++i) {
-        sprites[i].x = rand() % (SCREEN_WIDTH - SPRITE_WIDTH);
-        sprites[i].y = rand() % (SCREEN_HEIGHT - SPRITE_HEIGHT);
+        sprites[i].x = rand() % (config.window_width - SPRITE_WIDTH);
+        sprites[i].y = rand() % (config.window_height - SPRITE_HEIGHT);
         // Charger l'image du sprite. Assurez-vous d'avoir des fichiers BMP dans le même répertoire que votre exécutable.
-        sprites[i].texture = loadTexture("duck.bmp");
+        sprites[i].texture = loadTexture("assets/duck.bmp");
     }
 }
 
@@ -103,12 +109,32 @@ void render() {
     SDL_RenderPresent(renderer);
 }
 
-int main() {
-    if (!initializeSDL()) {
-        return EXIT_FAILURE;
+Config readConfig(const char* filename) {
+    Config config;
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        fprintf(stderr, "Erreur lors de l'ouverture du fichier de configuration.\n");
+        exit(EXIT_FAILURE);
     }
 
-    loadSprites();
+    // Lecture du fichier de configuration
+    while (fscanf(file, "%*[^:]:%d\n", &config.window_width) != 1);
+    while (fscanf(file, "%*[^:]:%d\n", &config.window_height) != 1);
+    while (fscanf(file, "%*[^:]:%d\n", &config.sound) != 1);
+
+    fclose(file);
+
+    return config;
+}
+
+int main() {
+    Config config = readConfig("conf/.conf");
+    if(!config.window_height)
+        return EXIT_FAILURE;
+    if (!initializeSDL(config))
+        return EXIT_FAILURE;
+
+    loadSprites(config);
 
     SDL_Event event;
     bool quit = false;
