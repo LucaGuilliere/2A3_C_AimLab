@@ -20,7 +20,7 @@ typedef struct {
     int x, y;
     SDL_Texture* texture;
     int score;
-    Digit digits[3]; // Pour un score allant jusqu'à 999
+    Digit digits[3];
 } Sprite;
 
 typedef struct {
@@ -31,7 +31,7 @@ typedef struct {
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
-Sprite duck; // Un seul canard
+Sprite duck;
 int score = 0;
 
 bool initializeSDL(Config config) {
@@ -111,7 +111,6 @@ void handleInput(SDL_Event event, Config config) {
 
         if (mouseX >= duck.x && mouseX <= duck.x + SPRITE_WIDTH &&
             mouseY >= duck.y && mouseY <= duck.y + SPRITE_HEIGHT) {
-            // Clique sur le canard, incrémenter le score et déplacer le canard
             duck.score++;
 
             duck.x = rand() % (config.window_width - SPRITE_WIDTH);
@@ -122,7 +121,6 @@ void handleInput(SDL_Event event, Config config) {
 
 void render(Config *config) {
     for (int i = 0; i < config->window_width; ++i) {
-        // Calculer la composante rouge et bleue en fonction de la position sur l'axe x
         int red = (i * 255) / config->window_width;
         int blue = 255 - red;
 
@@ -130,15 +128,13 @@ void render(Config *config) {
         SDL_RenderDrawLine(renderer, i, 0, i, config->window_height);
     }
 
-    // Afficher le canard
     SDL_Rect destRect = { duck.x, duck.y, SPRITE_WIDTH, SPRITE_HEIGHT };
     SDL_RenderCopy(renderer, duck.texture, NULL, &destRect);
 
-    // Afficher le score avec les chiffres
     int score = duck.score;
     int digitWidth = 50;
     int digitHeight = 50;
-    int x = config->window_width - digitWidth - 10; // Marge à droite de la fenêtre
+    int x = config->window_width - digitWidth - 10;
 
     if (score == 0) {
         SDL_Rect digitRect = { x, 10, digitWidth, digitHeight };
@@ -167,7 +163,6 @@ Config readConfig(const char* filename) {
         exit(EXIT_FAILURE);
     }
 
-    // Lecture du fichier de configuration
     while (fscanf(file, "%*[^:]:%d\n", &config.window_width) != 1);
     while (fscanf(file, "%*[^:]:%d\n", &config.window_height) != 1);
     while (fscanf(file, "%*[^:]:%d\n", &config.sound) != 1);
@@ -185,13 +180,12 @@ void displayTopScores() {
         ScoreEntry scores[5];
         for (int i = 0; i < 5; ++i) {
             if (fscanf(scoreboardFile, "%s %d", scores[i].player_name, &scores[i].score) != 2) {
-                break; // Arrête la lecture si le fichier n'a plus de scores
+                break;
             }
         }
 
         fclose(scoreboardFile);
 
-        // Tri des scores
         for (int i = 0; i < 5; ++i) {
             for (int j = i + 1; j < 5; ++j) {
                 if (scores[j].score > scores[i].score) {
@@ -202,7 +196,6 @@ void displayTopScores() {
             }
         }
 
-        // Affichage des scores
         for (int i = 0; i < 5; ++i) {
             printf("%d. %s - %d\n", i + 1, scores[i].player_name, scores[i].score);
         }
@@ -236,7 +229,7 @@ int main() {
             printf("Temps écoulé! Score final : %d\n", duck.score);
             quit = true;
         } else {
-            SDL_Delay(16); // Cap the frame rate to approximately 60 frames per second
+            SDL_Delay(16);
         }
     }
 
