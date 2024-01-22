@@ -103,5 +103,6 @@ Utilisation
     Assurez-vous d'avoir la bibliothèque SDL installée sur votre système.
     Compilez le code avec la commande: gcc src/main.c -o TrainAim $(sdl2-config --cflags --libs)
     Exécutez le programme généré.
+    Pour jouer, vous disposez de 30 secondes, cliquez sur le plus de cibles possibles dans les 30 secondes.
 
 Le joueur doit cliquer sur le canard pour marquer des points. Le jeu se termine après une durée prédéfinie, et le score final est affiché avec la possibilité d'entrer le nom du joueur pour l'enregistrement du score. Les cinq meilleurs scores sont également affichés à la fin du jeu.
